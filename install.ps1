@@ -2,6 +2,13 @@ Write-Host "========================================"
 Write-Host "🚀 Dev Setup - Inicialização (Windows)"
 Write-Host "========================================"
 
+$ErrorActionPreference = 'Stop'
+
+# Garante TLS moderno para downloads HTTPS em ambientes antigos
+try {
+  [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+} catch {}
+
 if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
   Write-Error "Winget não encontrado. Atualize o Windows."
   exit 1
@@ -25,22 +32,40 @@ if (!(Get-Command code -ErrorAction SilentlyContinue)) {
   winget install Microsoft.VisualStudioCode -e --silent
 }
 
-$BASE = "$env:USERPROFILE\dev-setup"
+$repoRawBase = "https://raw.githubusercontent.com/fernandohaeser/dev-setup/main"
+$tempRoot = Join-Path $env:TEMP ("dev-setup-" + [Guid]::NewGuid().ToString('n'))
 
-if (!(Test-Path $BASE)) {
-  Write-Host "⬇️ Baixando repositório..."
-  git clone https://github.com/fernandohaeser/dev-setup $BASE
+try {
+  New-Item -ItemType Directory -Path $tempRoot | Out-Null
+
+  if ($installTerminal) {
+    Write-Host "🖥️ Configurando terminal..."
+    $terminalDir = Join-Path $tempRoot 'terminal'
+    New-Item -ItemType Directory -Path $terminalDir | Out-Null
+
+    $terminalScript = Join-Path $terminalDir 'windows.ps1'
+    Invoke-WebRequest -Uri "$repoRawBase/terminal/windows.ps1" -UseBasicParsing -OutFile $terminalScript
+    & $terminalScript
+  }
+
+  Write-Host "🧠 Configurando VS Code..."
+  $vscodeDir = Join-Path $tempRoot 'vscode'
+  New-Item -ItemType Directory -Path $vscodeDir | Out-Null
+
+  Invoke-WebRequest -Uri "$repoRawBase/vscode/setup.js" -UseBasicParsing -OutFile (Join-Path $vscodeDir 'setup.js')
+  Invoke-WebRequest -Uri "$repoRawBase/vscode/settings.json" -UseBasicParsing -OutFile (Join-Path $vscodeDir 'settings.json')
+
+  Push-Location $vscodeDir
+  try {
+    node .\setup.js
+  } finally {
+    Pop-Location
+  }
+} finally {
+  if (Test-Path $tempRoot) {
+    Remove-Item -Path $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+  }
 }
-
-if ($installTerminal) {
-  Write-Host "🖥️ Configurando terminal..."
-  Set-Location "$BASE\terminal"
-  .\windows.ps1
-}
-
-Write-Host "🧠 Configurando VS Code..."
-Set-Location "$BASE\vscode"
-node setup.js
 
 Write-Host "========================================"
 Write-Host "✅ Setup concluído! Reinicie o terminal."

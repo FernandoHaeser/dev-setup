@@ -25,16 +25,26 @@ if ! command -v code &> /dev/null; then
   brew install --cask visual-studio-code
 fi
 
-BASE="$HOME/dev-setup"
-git clone https://github.com/fernandohaeser/dev-setup "$BASE" 2>/dev/null || true
+REPO_RAW_BASE="https://raw.githubusercontent.com/fernandohaeser/dev-setup/main"
+TMP_DIR="$(mktemp -d -t dev-setup-XXXXXXXX)"
+cleanup() {
+  rm -rf "$TMP_DIR" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
 
 if [[ "$INSTALL_TERMINAL" == "s" ]]; then
   echo "🖥️ Configurando terminal..."
-  bash "$BASE/terminal/macos.sh"
+  mkdir -p "$TMP_DIR/terminal"
+  curl -fsSL "$REPO_RAW_BASE/terminal/macos.sh" -o "$TMP_DIR/terminal/macos.sh"
+  chmod +x "$TMP_DIR/terminal/macos.sh"
+  bash "$TMP_DIR/terminal/macos.sh"
 fi
 
 echo "🧠 Configurando VS Code..."
-cd "$BASE/vscode"
+mkdir -p "$TMP_DIR/vscode"
+curl -fsSL "$REPO_RAW_BASE/vscode/setup.js" -o "$TMP_DIR/vscode/setup.js"
+curl -fsSL "$REPO_RAW_BASE/vscode/settings.json" -o "$TMP_DIR/vscode/settings.json"
+cd "$TMP_DIR/vscode"
 node setup.js
 
 echo "========================================"

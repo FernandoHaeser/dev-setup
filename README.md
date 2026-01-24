@@ -23,8 +23,9 @@ Com **um único comando**, este projeto instala e configura:
    - detecta o sistema operacional
    - instala dependências (Node, Git, VS Code)
    - pergunta se você quer configurar o terminal
-   - baixa este repositório automaticamente
+   - baixa **apenas os arquivos necessários** (temporariamente)
    - aplica todas as configurações do VS Code
+   - apaga os arquivos temporários ao finalizar
 3. Pronto. Ambiente configurado.
 
 ---
