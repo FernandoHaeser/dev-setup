@@ -1,5 +1,7 @@
 # 🚀 Dev Setup Universal
 
+# Teste
+
 Setup automático de ambiente de desenvolvimento para **Windows, Linux e macOS**.
 
 Com **um único comando**, este projeto instala e configura:
