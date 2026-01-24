@@ -43,8 +43,6 @@ dev-setup/
 │  ├─ windows.ps1
 │  ├─ linux.sh
 │  └─ macos.sh
-└─ profiles/
-   └─ ferna.json             # Perfil opcional por usuário
 ```
 
 ---
