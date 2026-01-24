@@ -13,7 +13,13 @@ if ! command -v node &> /dev/null; then
   fi
 fi
 
-command -v git || sudo apt install git -y
+if ! command -v git &> /dev/null; then
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install git
+  else
+    sudo apt install git -y
+  fi
+fi
 
 if ! command -v code &> /dev/null; then
   if [[ "$OSTYPE" == "darwin"* ]]; then
