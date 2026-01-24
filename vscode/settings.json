@@ -1,0 +1,29 @@
+{
+  "workbench.colorTheme": "GitHub Dark",
+  "workbench.iconTheme": "symbols",
+  "workbench.startupEditor": "none",
+
+  "workbench.activityBar.location": "top",
+  "workbench.sideBar.location": "right",
+
+  "editor.cursorSmoothCaretAnimation": "on",
+  "animations.CursorAnimation": true,
+
+  "files.autoSave": "afterDelay",
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+  "github.copilot.nextEditSuggestions.enabled": true,
+
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
