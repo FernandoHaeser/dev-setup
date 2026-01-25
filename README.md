@@ -276,8 +276,8 @@ Abra o VS Code uma vez manualmente e rode o script novamente.
 
 ## ✅ Requisitos mínimos
 
-- Windows 10+
-- Ubuntu/Debian ou derivado
+- Windows 11
+- Ubuntu/Debian ou derivado (20.04+)
 - macOS 12+
 - Conexão com internet
 
