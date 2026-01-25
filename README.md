@@ -214,6 +214,12 @@ O setup é **idempotente**:
 ### `code: command not found`
 Reabra o terminal ou reinicie o sistema.
 
+### Saída verbosa do `apt` / `update-alternatives`
+É normal o Ubuntu imprimir várias linhas durante instalações (ex.: `update-alternatives`, `Processing triggers`). Isso não é erro.
+
+### `oh-my-posh` ou comandos do terminal não aparecem
+Após instalar o terminal (Linux/macOS), reinicie o terminal (ou abra uma nova sessão) para recarregar o `PATH` e o `.zshrc`.
+
 ### Extensão não instalou
 Abra o VS Code uma vez manualmente e rode o script novamente.
 
