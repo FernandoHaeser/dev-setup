@@ -200,6 +200,7 @@ Se ativado, o script instala e configura:
 - Prompt estilizado
 - Tema moderno
 - Integração com Git
+- Info do sistema ao abrir (Fastfetch/Neofetch)
 
 Cada sistema usa seu próprio script:
 

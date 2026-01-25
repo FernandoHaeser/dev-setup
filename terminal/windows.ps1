@@ -32,7 +32,8 @@ if (Get-Command winget -ErrorAction SilentlyContinue) {
         @{ id = 'Microsoft.WindowsTerminal'; name = 'Windows Terminal' },
         @{ id = 'Microsoft.PowerShell'; name = 'PowerShell' },
         @{ id = 'JanDeDobbeleer.OhMyPosh'; name = 'Oh My Posh' },
-        @{ id = 'Neofetch.Neofetch'; name = 'Neofetch' }
+        @{ id = 'Neofetch.Neofetch'; name = 'Neofetch' },
+        @{ id = 'Fastfetch-cli.Fastfetch'; name = 'Fastfetch' }
     )) {
         try {
             winget install --id $pkg.id -e --silent --source winget --accept-source-agreements --accept-package-agreements
@@ -105,8 +106,12 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
     Set-PSReadLineKeyHandler -Key Tab -Function Complete
 }
 
-# Neofetch ao abrir
-if (Get-Command neofetch -ErrorAction SilentlyContinue) { neofetch }
+# Fastfetch/Neofetch ao abrir
+if (Get-Command fastfetch -ErrorAction SilentlyContinue) {
+    fastfetch
+} elseif (Get-Command neofetch -ErrorAction SilentlyContinue) {
+    neofetch
+}
 
 # Aliases úteis
 Set-Alias ll ls
