@@ -1,6 +1,15 @@
-Write-Host "========================================"
-Write-Host "🚀 Dev Setup - Inicialização (Windows)"
-Write-Host "========================================"
+function Write-Hr { Write-Host "----------------------------------------" -ForegroundColor DarkGray }
+function Write-Header {
+  Write-Host "Dev Setup" -ForegroundColor Cyan
+  Write-Host "Windows" -ForegroundColor DarkGray
+  Write-Hr
+}
+function Write-Step { param([string]$Message) Write-Host "▶ $Message" -ForegroundColor Cyan }
+function Write-Ok { param([string]$Message) Write-Host "✅ $Message" -ForegroundColor Green }
+function Write-Info { param([string]$Message) Write-Host "ℹ️  $Message" -ForegroundColor DarkGray }
+function Write-WarnMsg { param([string]$Message) Write-Host "⚠️  $Message" -ForegroundColor Yellow }
+
+Write-Header
 
 $ErrorActionPreference = 'Stop'
 
@@ -99,7 +108,7 @@ function Install-Exe {
 function Ensure-Winget {
   if (Test-Command 'winget') { return $true }
 
-  Write-Host "📦 Winget não encontrado. Tentando instalar o App Installer (winget)..."
+  Write-Step "Winget não encontrado. Tentando instalar o App Installer (winget)..."
   $tmp = New-TempDir
   try {
     $vclibs = Join-Path $tmp 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
@@ -125,7 +134,7 @@ function Ensure-Node {
   if (Test-Command 'node') { return }
 
   if ($UseWinget) {
-    Write-Host "📦 Instalando Node.js (winget)..."
+    Write-Step "Instalando Node.js (winget)..."
     try {
       winget install OpenJS.NodeJS.LTS -e --silent --source winget --accept-source-agreements --accept-package-agreements
     } catch {
@@ -142,7 +151,7 @@ function Ensure-Node {
     if (Ensure-ToolOnPath -Exe 'node' -CandidateDirs $nodeDirs) { return }
   }
 
-  Write-Host "📦 Instalando Node.js (MSI)..."
+  Write-Step "Instalando Node.js (MSI)..."
   $tmp = New-TempDir
   try {
     $index = Invoke-RestMethod -Uri 'https://nodejs.org/dist/index.json'
@@ -164,7 +173,7 @@ function Ensure-Git {
   if (Test-Command 'git') { return }
 
   if ($UseWinget) {
-    Write-Host "📦 Instalando Git (winget)..."
+    Write-Step "Instalando Git (winget)..."
     try {
       winget install Git.Git -e --silent --source winget --accept-source-agreements --accept-package-agreements
     } catch {
@@ -180,7 +189,7 @@ function Ensure-Git {
     if (Ensure-ToolOnPath -Exe 'git' -CandidateDirs $gitDirs) { return }
   }
 
-  Write-Host "📦 Instalando Git (EXE)..."
+  Write-Step "Instalando Git (EXE)..."
   $tmp = New-TempDir
   try {
     $exeUrl = 'https://github.com/git-for-windows/git/releases/latest/download/Git-64-bit.exe'
@@ -197,7 +206,7 @@ function Ensure-VSCode {
   if (Test-Command 'code') { return }
 
   if ($UseWinget) {
-    Write-Host "📦 Instalando VS Code (winget)..."
+    Write-Step "Instalando VS Code (winget)..."
     try {
       winget install Microsoft.VisualStudioCode -e --silent --source winget --accept-source-agreements --accept-package-agreements
     } catch {
@@ -213,7 +222,7 @@ function Ensure-VSCode {
     if (Ensure-ToolOnPath -Exe 'code' -CandidateDirs $codeDirs) { return }
   }
 
-  Write-Host "📦 Instalando VS Code (EXE)..."
+  Write-Step "Instalando VS Code (EXE)..."
   $tmp = New-TempDir
   try {
     $exeUrl = 'https://update.code.visualstudio.com/latest/win32-x64-user/stable'
@@ -245,7 +254,7 @@ try {
   New-Item -ItemType Directory -Path $tempRoot | Out-Null
 
   if ($installTerminal) {
-    Write-Host "🖥️ Configurando terminal..."
+    Write-Step "Configurando terminal..."
     $terminalDir = Join-Path $tempRoot 'terminal'
     New-Item -ItemType Directory -Path $terminalDir | Out-Null
 
@@ -259,7 +268,7 @@ try {
     }
   }
 
-  Write-Host "🧠 Configurando VS Code..."
+  Write-Step "Configurando VS Code (extensões + settings)..."
   $vscodeDir = Join-Path $tempRoot 'vscode'
   New-Item -ItemType Directory -Path $vscodeDir | Out-Null
 
@@ -273,21 +282,21 @@ try {
     Pop-Location
   }
 
-  Write-Host "----------------------------------------"
-  Write-Host "🔎 Verificando instalações"
+  Write-Hr
+  Write-Step "Verificando instalações"
   foreach ($cmd in @('winget', 'node', 'git', 'code')) {
     if (Get-Command $cmd -ErrorAction SilentlyContinue) {
-      Write-Host "✅ $cmd"
+      Write-Ok "$cmd"
     } else {
-      Write-Host "⚠️  $cmd não encontrado (pode exigir reinício do terminal/Windows)"
+      Write-WarnMsg "$cmd não encontrado (pode exigir reinício do terminal/Windows)"
     }
   }
   if ($installTerminal) {
     foreach ($cmd in @('wt', 'oh-my-posh', 'neofetch')) {
       if (Get-Command $cmd -ErrorAction SilentlyContinue) {
-        Write-Host "✅ $cmd"
+        Write-Ok "$cmd"
       } else {
-        Write-Host "⚠️  $cmd não encontrado (pode exigir reinício do terminal/Windows)"
+        Write-WarnMsg "$cmd não encontrado (pode exigir reinício do terminal/Windows)"
       }
     }
   }
@@ -297,6 +306,5 @@ try {
   }
 }
 
-Write-Host "========================================"
-Write-Host "✅ Setup concluído! Reinicie o terminal."
-Write-Host "========================================"
+Write-Hr
+Write-Ok "Setup concluído! Reinicie o terminal."

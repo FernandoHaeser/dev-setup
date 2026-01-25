@@ -1,7 +1,35 @@
 #!/usr/bin/env bash
 set -e
 
-echo "🚀 Iniciando setup do terminal (Linux)"
+supports_color() {
+  [[ -t 1 ]] || return 1
+  command -v tput >/dev/null 2>&1 || return 1
+  [[ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]]
+}
+
+if supports_color; then
+  BOLD="$(tput bold)"
+  DIM="$(tput dim)"
+  RESET="$(tput sgr0)"
+  GREEN="$(tput setaf 2)"
+  YELLOW="$(tput setaf 3)"
+  BLUE="$(tput setaf 4)"
+  CYAN="$(tput setaf 6)"
+else
+  BOLD=""; DIM=""; RESET=""; GREEN=""; YELLOW=""; BLUE=""; CYAN=""
+fi
+
+hr() { echo "${DIM}----------------------------------------${RESET}"; }
+header() {
+  echo "${BOLD}${BLUE}Terminal Setup${RESET}${DIM} · Linux${RESET}"
+  hr
+}
+step() { echo "${CYAN}▶${RESET} $*"; }
+ok() { echo "${GREEN}✅${RESET} $*"; }
+warn() { echo "${YELLOW}⚠️${RESET}  $*"; }
+info() { echo "${DIM}ℹ️${RESET}  $*"; }
+
+header
 
 WORKDIR="$(mktemp -d -t dev-setup-terminal-XXXXXXXX)"
 cleanup() {
@@ -9,11 +37,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "🔧 Atualizando sistema..."
+step "Atualizando sistema..."
 sudo apt update
 sudo apt upgrade -y
 
-echo "📦 Instalando pacotes base..."
+step "Instalando pacotes base..."
 sudo apt install -y \
   software-properties-common \
   curl \
@@ -26,7 +54,7 @@ sudo apt install -y \
   fonts-powerline \
   fontconfig
 
-echo "🔤 Instalando FiraCode Nerd Font (para ícones)..."
+step "Instalando FiraCode Nerd Font (para ícones)..."
 FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
 curl -fLo "$FONT_DIR/FiraCodeNerdFont-Regular.ttf" \
@@ -34,7 +62,7 @@ curl -fLo "$FONT_DIR/FiraCodeNerdFont-Regular.ttf" \
 fc-cache -fv || true
 
 # ---------- FASTFETCH ----------
-echo "🖼️ Instalando Fastfetch..."
+step "Instalando Fastfetch..."
 if apt-cache show fastfetch >/dev/null 2>&1; then
   sudo apt install -y fastfetch
 else
@@ -45,7 +73,7 @@ else
     | head -n 1)
 
   if [[ -z "$FASTFETCH_URL" ]]; then
-    echo "⚠️  Não foi possível descobrir a URL do Fastfetch (GitHub)."
+    warn "Não foi possível descobrir a URL do Fastfetch (GitHub)."
   else
     wget -O "$WORKDIR/fastfetch.deb" "$FASTFETCH_URL"
     sudo apt install -y "$WORKDIR/fastfetch.deb"
@@ -53,7 +81,7 @@ else
 fi
 
 # ---------- OH MY ZSH ----------
-echo "🎨 Instalando Oh My Zsh..."
+step "Instalando Oh My Zsh..."
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
   RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
 fi
@@ -62,7 +90,7 @@ ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
 mkdir -p "$ZSH_CUSTOM/plugins" "$ZSH_CUSTOM/themes"
 
 # ---------- PLUGINS ----------
-echo "⚡ Instalando plugins Zsh..."
+step "Instalando plugins Zsh..."
 if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]]; then
   git clone https://github.com/zsh-users/zsh-autosuggestions \
     "$ZSH_CUSTOM/plugins/zsh-autosuggestions" || true
@@ -79,14 +107,14 @@ if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ]]; then
 fi
 
 # ---------- TEMA ----------
-echo "🎭 Instalando Powerlevel10k..."
+step "Instalando Powerlevel10k..."
 if [[ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ]]; then
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
     "$ZSH_CUSTOM/themes/powerlevel10k" || true
 fi
 
 # ---------- POWERLEVEL10K CONFIG ----------
-echo "⚙️ Criando configuração padrão do Powerlevel10k..."
+step "Criando configuração padrão do Powerlevel10k..."
 cat > "$HOME/.p10k.zsh" << 'EOF'
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)
 POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time time)
@@ -99,7 +127,7 @@ POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
 EOF
 
 # ---------- ZSHRC ----------
-echo "📝 Criando .zshrc..."
+step "Criando .zshrc..."
 cat > "$HOME/.zshrc" << 'EOF'
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -134,7 +162,7 @@ export EDITOR=nvim
 EOF
 
 # ---------- TERMINATOR ----------
-echo "🖥️ Configurando Terminator..."
+step "Configurando Terminator..."
 mkdir -p "$HOME/.config/terminator"
 
 cat > "$HOME/.config/terminator/config" << 'EOF'
@@ -157,16 +185,16 @@ cat > "$HOME/.config/terminator/config" << 'EOF'
 EOF
 
 # ---------- SHELL PADRÃO ----------
-echo "🔁 Definindo Zsh como shell padrão..."
+step "Definindo Zsh como shell padrão..."
 if chsh -s "$(command -v zsh)" "$USER" >/dev/null 2>&1; then
-  echo "✅ Zsh definido como shell padrão"
+  ok "Zsh definido como shell padrão"
 elif sudo chsh -s "$(command -v zsh)" "$USER" >/dev/null 2>&1; then
-  echo "✅ Zsh definido como shell padrão"
+  ok "Zsh definido como shell padrão"
 else
-  echo "ℹ️  Não foi possível definir automaticamente (pode exigir senha). Rode manualmente: sudo chsh -s \"$(command -v zsh)\" \"$USER\""
+  info "Não foi possível definir automaticamente (pode exigir senha). Rode manualmente: sudo chsh -s \"$(command -v zsh)\" \"$USER\""
 fi
 
 echo ""
-echo "✅ Ambiente DEV configurado com sucesso!"
-echo "➡️ Se você ainda estiver no bash, rode agora: exec zsh"
-echo "➡️ Para abrir o wizard do tema: p10k configure"
+ok "Ambiente DEV configurado com sucesso!"
+info "Se você ainda estiver no bash, rode agora: exec zsh"
+info "Para abrir o wizard do tema: p10k configure"

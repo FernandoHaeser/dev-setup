@@ -1,4 +1,15 @@
-Write-Host "🚀 Dev Setup - Windows"
+function Write-Hr { Write-Host "----------------------------------------" -ForegroundColor DarkGray }
+function Write-Header {
+  Write-Host "Dev Setup" -ForegroundColor Cyan
+  Write-Host "Windows" -ForegroundColor DarkGray
+  Write-Hr
+}
+function Write-Step { param([string]$Message) Write-Host "▶ $Message" -ForegroundColor Cyan }
+function Write-Ok { param([string]$Message) Write-Host "✅ $Message" -ForegroundColor Green }
+function Write-Info { param([string]$Message) Write-Host "ℹ️  $Message" -ForegroundColor DarkGray }
+function Write-WarnMsg { param([string]$Message) Write-Host "⚠️  $Message" -ForegroundColor Yellow }
+
+Write-Header
 
 $ErrorActionPreference = 'Stop'
 
@@ -94,7 +105,7 @@ function Install-Exe {
 function Ensure-Winget {
   if (Test-Command 'winget') { return $true }
 
-  Write-Host "📦 Winget não encontrado. Tentando instalar o App Installer (winget)..."
+  Write-Step "Winget não encontrado. Tentando instalar o App Installer (winget)..."
   $tmp = New-TempDir
   try {
     $vclibs = Join-Path $tmp 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
@@ -254,21 +265,21 @@ try {
     Pop-Location
   }
 
-  Write-Host "----------------------------------------"
-  Write-Host "🔎 Verificando instalações"
+  Write-Hr
+  Write-Step "Verificando instalações"
   foreach ($cmd in @('winget', 'node', 'git', 'code')) {
     if (Get-Command $cmd -ErrorAction SilentlyContinue) {
-      Write-Host "✅ $cmd"
+      Write-Ok "$cmd"
     } else {
-      Write-Host "⚠️  $cmd não encontrado (pode exigir reinício do terminal/Windows)"
+      Write-WarnMsg "$cmd não encontrado (pode exigir reinício do terminal/Windows)"
     }
   }
   if ($env:SETUP_TERMINAL -eq "true") {
     foreach ($cmd in @('wt', 'oh-my-posh', 'neofetch')) {
       if (Get-Command $cmd -ErrorAction SilentlyContinue) {
-        Write-Host "✅ $cmd"
+        Write-Ok "$cmd"
       } else {
-        Write-Host "⚠️  $cmd não encontrado (pode exigir reinício do terminal/Windows)"
+        Write-WarnMsg "$cmd não encontrado (pode exigir reinício do terminal/Windows)"
       }
     }
   }
@@ -278,4 +289,5 @@ try {
   }
 }
 
-Write-Host "✅ Setup concluído"
+Write-Hr
+Write-Ok "Setup concluído"

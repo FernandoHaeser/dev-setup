@@ -6,7 +6,18 @@ try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 } catch {}
 
-Write-Host "Iniciando setup do terminal..." -ForegroundColor Cyan
+function Write-Hr { Write-Host "----------------------------------------" -ForegroundColor DarkGray }
+function Write-Header {
+    Write-Host "Terminal Setup" -ForegroundColor Cyan
+    Write-Host "Windows" -ForegroundColor DarkGray
+    Write-Hr
+}
+function Write-Step { param([string]$Message) Write-Host "▶ $Message" -ForegroundColor Cyan }
+function Write-Ok { param([string]$Message) Write-Host "✅ $Message" -ForegroundColor Green }
+function Write-Info { param([string]$Message) Write-Host "ℹ️  $Message" -ForegroundColor DarkGray }
+
+Write-Header
+Write-Step "Iniciando setup do terminal..."
 
 if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
     Write-Warning "Winget não encontrado. Tentando instalar o App Installer (winget)..."
@@ -72,7 +83,7 @@ function Get-DevSetupProfilePath {
 
 $profilePath = Get-DevSetupProfilePath
 if (-not $profilePath) {
-    Write-Host "Setup do terminal concluído (sem alterar o profile)." -ForegroundColor Yellow
+    Write-Host "⚠️  Setup do terminal concluído (sem alterar o profile)." -ForegroundColor Yellow
     return
 }
 
@@ -125,4 +136,5 @@ if (Test-Path "C:\\Program Files\\Microsoft VS Code\\Code.exe") {
 $env:POSH_GIT_ENABLED = $true
 '@ | Out-File -Encoding UTF8 $profilePath
 
-Write-Host "Setup concluído! Reinicie o Windows Terminal." -ForegroundColor Green
+Write-Hr
+Write-Ok "Setup concluído! Reinicie o Windows Terminal."

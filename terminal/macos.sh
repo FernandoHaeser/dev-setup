@@ -1,27 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "=============================================="
-echo " 🚀 macOS Dev Terminal + iTerm2 (FINAL)"
-echo "=============================================="
+supports_color() {
+  [[ -t 1 ]] || return 1
+  command -v tput >/dev/null 2>&1 || return 1
+  [[ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]]
+}
+
+if supports_color; then
+  BOLD="$(tput bold)"
+  DIM="$(tput dim)"
+  RESET="$(tput sgr0)"
+  RED="$(tput setaf 1)"
+  GREEN="$(tput setaf 2)"
+  YELLOW="$(tput setaf 3)"
+  BLUE="$(tput setaf 4)"
+  CYAN="$(tput setaf 6)"
+else
+  BOLD=""; DIM=""; RESET=""; RED=""; GREEN=""; YELLOW=""; BLUE=""; CYAN=""
+fi
+
+hr() { echo "${DIM}----------------------------------------------${RESET}"; }
+header() {
+  echo "${BOLD}${BLUE}Terminal Setup${RESET}${DIM} · macOS + iTerm2${RESET}"
+  hr
+}
+step() { echo "${CYAN}▶${RESET} $*"; }
+ok() { echo "${GREEN}✅${RESET} $*"; }
+warn() { echo "${YELLOW}⚠️${RESET}  $*"; }
+info() { echo "${DIM}ℹ️${RESET}  $*"; }
+
+header
 
 # ------------------------------------------------
 # 1. Xcode Command Line Tools
 # ------------------------------------------------
 if ! xcode-select -p &>/dev/null; then
-  echo "📦 Installing Xcode Command Line Tools..."
+  step "Installing Xcode Command Line Tools..."
   xcode-select --install
-  echo "⚠️ Finish installation and run the script again."
+  warn "Finish installation and run the script again."
   exit 1
 else
-  echo "✅ Xcode Command Line Tools already installed"
+  ok "Xcode Command Line Tools already installed"
 fi
 
 # ------------------------------------------------
 # 2. Homebrew
 # ------------------------------------------------
 if ! command -v brew &>/dev/null; then
-  echo "🍺 Installing Homebrew..."
+  step "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
@@ -33,8 +60,8 @@ elif [[ -x /usr/local/bin/brew ]]; then
 fi
 
 if ! command -v brew &>/dev/null; then
-  echo "❌ Homebrew not found on PATH after install."
-  echo "   Reopen your terminal and run again."
+  echo "${RED}❌${RESET} Homebrew not found on PATH after install."
+  info "Reopen your terminal and run again."
   exit 1
 fi
 
@@ -54,14 +81,14 @@ brew update
 # ------------------------------------------------
 # 3. CLI Tools
 # ------------------------------------------------
-echo "📦 Installing CLI tools..."
+step "Installing CLI tools..."
 brew install \
   git wget curl fzf bat eza htop tmux ripgrep tree jq neovim gnupg fastfetch
 
 # ------------------------------------------------
 # 4. Dev Tools
 # ------------------------------------------------
-echo "🧠 Installing dev tools..."
+step "Installing dev tools..."
 brew install \
   node python openjdk go \
   kubectl helm
@@ -73,16 +100,16 @@ brew install --cask docker
 # 5. iTerm2
 # ------------------------------------------------
 if ! [ -d "/Applications/iTerm.app" ]; then
-  echo "📦 Installing iTerm2..."
+  step "Installing iTerm2..."
   brew install --cask iterm2
 else
-  echo "✅ iTerm2 already installed"
+  ok "iTerm2 already installed"
 fi
 
 # ------------------------------------------------
 # 6. Nerd Font
 # ------------------------------------------------
-echo "🔤 Installing Meslo Nerd Font..."
+step "Installing Meslo Nerd Font..."
 brew tap homebrew/cask-fonts >/dev/null 2>&1 || true
 brew install --cask font-meslo-lg-nerd-font || true
 
@@ -90,16 +117,16 @@ brew install --cask font-meslo-lg-nerd-font || true
 # 7. Oh My Zsh
 # ------------------------------------------------
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-  echo "✨ Installing Oh My Zsh..."
+  step "Installing Oh My Zsh..."
   RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 else
-  echo "✅ Oh My Zsh already installed"
+  ok "Oh My Zsh already installed"
 fi
 
 # ------------------------------------------------
 # 8. Powerlevel10k (Oh My Zsh theme)
 # ------------------------------------------------
-echo "🎨 Installing Powerlevel10k..."
+step "Installing Powerlevel10k..."
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 mkdir -p "$ZSH_CUSTOM/themes"
 if [[ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ]]; then
@@ -110,7 +137,7 @@ fi
 # ------------------------------------------------
 # 9. Zsh Plugins
 # ------------------------------------------------
-echo "🔌 Installing Zsh plugins..."
+step "Installing Zsh plugins..."
 brew install \
   zsh-autosuggestions \
   zsh-syntax-highlighting \
@@ -119,7 +146,7 @@ brew install \
 # ------------------------------------------------
 # 10. .zshrc (SAFE + CLEAN)
 # ------------------------------------------------
-echo "⚙️ Configuring .zshrc..."
+step "Configuring .zshrc..."
 
 ZSHRC="$HOME/.zshrc"
 cp "$ZSHRC" "$ZSHRC.backup.$(date +%s)" 2>/dev/null || true
@@ -207,7 +234,7 @@ EOF
 # 11. Default shell
 # ------------------------------------------------
 if [[ "${SHELL:-}" != *"zsh"* ]]; then
-  echo "🔄 Setting Zsh as default shell..."
+  step "Setting Zsh as default shell..."
   chsh -s "$(command -v zsh)" || true
 fi
 
@@ -216,7 +243,7 @@ fi
 # ------------------------------------------------
 COLOR_FILE="$HOME/TokyoNight.itermcolors"
 
-echo "🎨 Creating Tokyo Night color preset..."
+step "Creating Tokyo Night color preset..."
 cat > "$COLOR_FILE" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -242,17 +269,13 @@ EOF
 # ------------------------------------------------
 # Final
 # ------------------------------------------------
-echo "=============================================="
-echo " ✅ Setup completed with SUCCESS!"
-echo ""
-echo " NEXT STEPS:"
-echo " 1. Open a NEW terminal (iTerm2)"
-echo " 2. Powerlevel10k wizard will start (or run: p10k configure)"
-echo " 3. iTerm2 → Settings → Profiles → Colors"
-echo "    Import: TokyoNight.itermcolors"
-echo " 4. Profiles → Text → MesloLGS Nerd Font (13)"
-echo ""
-echo " 🔥 Dev terminal 100% ready."
-echo "=============================================="
+hr
+ok "Setup completed successfully"
+info "Next steps:"
+info "1) Open a NEW terminal (iTerm2)"
+info "2) Powerlevel10k wizard will start (or run: p10k configure)"
+info "3) iTerm2 → Settings → Profiles → Colors → Import: TokyoNight.itermcolors"
+info "4) Profiles → Text → MesloLGS Nerd Font (13)"
+hr
 
 open -a iTerm || true
