@@ -210,6 +210,9 @@ Algumas configurações (fonte, shell padrão, `PATH`, perfil do PowerShell) só
 3. Se o tema/prompt não aparecer:
    - Confirme que o perfil foi escrito em `Documents\PowerShell\Microsoft.PowerShell_profile.ps1`.
    - Rode `pwsh` novamente (nova aba) para recarregar o profile.
+5. Se aparecer erro vermelho dizendo que o profile “não pode ser carregado porque a execução de scripts foi desabilitada”, isso é **ExecutionPolicy** do Windows PowerShell (5.1) bloqueando scripts.
+   - Recomendado: use o PowerShell 7 (`pwsh`) no Windows Terminal.
+   - Alternativa (por usuário): rode `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` e abra uma nova aba.
 4. Se o `oh-my-posh`/`neofetch` não for encontrado, reinicie o Windows Terminal (às vezes o PATH demora a atualizar após o `winget`).
 
 ### 🐧 Linux (Ubuntu/Debian)

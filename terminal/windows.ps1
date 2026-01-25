@@ -47,11 +47,38 @@ if (Get-Command winget -ErrorAction SilentlyContinue) {
 Install-Module PSReadLine -Force -SkipPublisherCheck -Scope CurrentUser
 Install-Module Terminal-Icons -Force -SkipPublisherCheck -Scope CurrentUser
 
-$profilePath = $PROFILE
+function Get-DevSetupProfilePath {
+    $docs = [Environment]::GetFolderPath('MyDocuments')
+    $ps7ProfilePath = Join-Path (Join-Path $docs 'PowerShell') 'Microsoft.PowerShell_profile.ps1'
+    $ps5ProfilePath = Join-Path (Join-Path $docs 'WindowsPowerShell') 'Microsoft.PowerShell_profile.ps1'
+
+    # Prefer PowerShell 7 profile to avoid Windows PowerShell (5.1) ExecutionPolicy surprises.
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        return $ps7ProfilePath
+    }
+
+    # Fallback: current host profile (usually Windows PowerShell profile when running in 5.1).
+    $currentUserPolicy = $null
+    try { $currentUserPolicy = Get-ExecutionPolicy -Scope CurrentUser } catch {}
+    if ($currentUserPolicy -eq 'Restricted' -and $PROFILE -eq $ps5ProfilePath) {
+        Write-Warning "Seu PowerShell está com ExecutionPolicy=Restricted para o usuário. Vou pular a escrita do profile para evitar o erro 'execução de scripts foi desabilitada'."
+        Write-Warning "Abra o PowerShell 7 (pwsh) ou rode: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned"
+        return $null
+    }
+
+    return $PROFILE
+}
+
+$profilePath = Get-DevSetupProfilePath
+if (-not $profilePath) {
+    Write-Host "Setup do terminal concluído (sem alterar o profile)." -ForegroundColor Yellow
+    return
+}
+
 $profileDir = Split-Path $profilePath
 
 if (!(Test-Path $profileDir)) {
-    New-Item -ItemType Directory -Path $profileDir
+    New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
 }
 
 @"
