@@ -68,6 +68,16 @@ dev-setup/
 
 ## 🪟 Windows
 
+### ✅ Pré-requisito (evita erro de scripts bloqueados)
+
+Antes de rodar o instalador, libere execução de scripts **para o seu usuário**:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+```
+
+> Se sua máquina for gerenciada por empresa (GPO/Intune), esse comando pode ser bloqueado. Nesse caso, use o PowerShell 7 (`pwsh`) e/ou pule a etapa de profile do Windows PowerShell.
+
 ### ▶️ Executar instalação
 
 Abra o **PowerShell como administrador** e execute:
@@ -210,10 +220,10 @@ Algumas configurações (fonte, shell padrão, `PATH`, perfil do PowerShell) só
 3. Se o tema/prompt não aparecer:
    - Confirme que o perfil foi escrito em `Documents\PowerShell\Microsoft.PowerShell_profile.ps1`.
    - Rode `pwsh` novamente (nova aba) para recarregar o profile.
-5. Se aparecer erro vermelho dizendo que o profile “não pode ser carregado porque a execução de scripts foi desabilitada”, isso é **ExecutionPolicy** do Windows PowerShell (5.1) bloqueando scripts.
+4. Se aparecer erro vermelho dizendo que o profile “não pode ser carregado porque a execução de scripts foi desabilitada”, isso é **ExecutionPolicy** do Windows PowerShell (5.1) bloqueando scripts.
    - Recomendado: use o PowerShell 7 (`pwsh`) no Windows Terminal.
    - Alternativa (por usuário): rode `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` e abra uma nova aba.
-4. Se o `oh-my-posh`/`neofetch` não for encontrado, reinicie o Windows Terminal (às vezes o PATH demora a atualizar após o `winget`).
+5. Se o `oh-my-posh`/`neofetch` não for encontrado, reinicie o Windows Terminal (às vezes o PATH demora a atualizar após o `winget`).
 
 ### 🐧 Linux (Ubuntu/Debian)
 
