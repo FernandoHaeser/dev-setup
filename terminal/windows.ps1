@@ -81,15 +81,15 @@ if (!(Test-Path $profileDir)) {
     New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
 }
 
-@"
+@'
 # ================================
 # PROFILE DEV - PowerShell
 # ================================
 
 # Prompt bonito
 if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
-    if (Test-Path "\$env:POSH_THEMES_PATH\\jandedobbeleer.omp.json") {
-        oh-my-posh init pwsh --config "\$env:POSH_THEMES_PATH\\jandedobbeleer.omp.json" | Invoke-Expression
+    if (Test-Path "$env:POSH_THEMES_PATH\jandedobbeleer.omp.json") {
+        oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\jandedobbeleer.omp.json" | Invoke-Expression
     } else {
         oh-my-posh init pwsh | Invoke-Expression
     }
@@ -117,7 +117,7 @@ if (Test-Path "C:\\Program Files\\Microsoft VS Code\\Code.exe") {
 }
 
 # Git branch no prompt
-\$env:POSH_GIT_ENABLED = \$true
-"@ | Out-File -Encoding UTF8 $profilePath
+$env:POSH_GIT_ENABLED = $true
+'@ | Out-File -Encoding UTF8 $profilePath
 
 Write-Host "Setup concluído! Reinicie o Windows Terminal." -ForegroundColor Green
