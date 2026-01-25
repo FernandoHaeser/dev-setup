@@ -261,6 +261,17 @@ source ~/.zshrc
 
 4. As Nerd Fonts são instaladas via Homebrew Cask; às vezes o Terminal/iTerm precisa ser reaberto para listar a fonte.
 
+5. Se você quiser o **Fastfetch bem no topo** do carregamento do shell (ex.: antes do Oh My Zsh), ajuste o `~/.zshrc` movendo este bloco para o início do arquivo (logo depois do “Powerlevel10k Instant Prompt”):
+
+```bash
+# =================================================
+# Fastfetch (SAFE)
+# =================================================
+if [[ -o interactive ]]; then
+   fastfetch
+fi
+```
+
 ---
 
 ## 🔁 Posso rodar mais de uma vez?
