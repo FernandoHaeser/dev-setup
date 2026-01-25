@@ -5,17 +5,32 @@ $ErrorActionPreference = 'Stop'
 Write-Host "Iniciando setup do terminal..." -ForegroundColor Cyan
 
 if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Error "Winget não encontrado. Atualize o Windows."
-    exit
+    Write-Warning "Winget não encontrado. Tentando instalar o App Installer (winget)..."
+    $tmp = Join-Path $env:TEMP ("dev-setup-" + [Guid]::NewGuid().ToString('n'))
+    New-Item -ItemType Directory -Path $tmp | Out-Null
+    try {
+        $vclibs = Join-Path $tmp 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
+        Invoke-WebRequest -Uri 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx' -UseBasicParsing -OutFile $vclibs
+        try { Add-AppxPackage -Path $vclibs -ErrorAction SilentlyContinue } catch {}
+
+        $bundle = Join-Path $tmp 'Microsoft.DesktopAppInstaller.msixbundle'
+        Invoke-WebRequest -Uri 'https://aka.ms/getwinget' -UseBasicParsing -OutFile $bundle
+        Add-AppxPackage -Path $bundle -ErrorAction SilentlyContinue
+    } catch {
+        Write-Warning "Não foi possível instalar o winget automaticamente: $($_.Exception.Message)"
+    } finally {
+        Remove-Item -Path $tmp -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
-winget install --id Microsoft.WindowsTerminal -e --silent --accept-source-agreements --accept-package-agreements
-
-winget install --id Microsoft.PowerShell -e --silent --accept-source-agreements --accept-package-agreements
-
-winget install --id JanDeDobbeleer.OhMyPosh -e --silent --accept-source-agreements --accept-package-agreements
-
-winget install --id Neofetch.Neofetch -e --silent --accept-source-agreements --accept-package-agreements
+if (Get-Command winget -ErrorAction SilentlyContinue) {
+    winget install --id Microsoft.WindowsTerminal -e --silent --accept-source-agreements --accept-package-agreements
+    winget install --id Microsoft.PowerShell -e --silent --accept-source-agreements --accept-package-agreements
+    winget install --id JanDeDobbeleer.OhMyPosh -e --silent --accept-source-agreements --accept-package-agreements
+    winget install --id Neofetch.Neofetch -e --silent --accept-source-agreements --accept-package-agreements
+} else {
+    Write-Warning "Winget ainda não está disponível. Vou configurar o profile do PowerShell, mas não consigo instalar Windows Terminal/Oh My Posh/Neofetch automaticamente sem winget."
+}
 
 Install-Module PSReadLine -Force -SkipPublisherCheck -Scope CurrentUser
 Install-Module Terminal-Icons -Force -SkipPublisherCheck -Scope CurrentUser
