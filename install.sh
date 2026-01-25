@@ -37,9 +37,12 @@ check_cmd() {
   return 1
 }
 
+echo "📦 Atualizando pacotes do sistema..."
+sudo apt update
+sudo apt upgrade -y
+
 if ! command -v curl &> /dev/null; then
   echo "📦 Instalando curl..."
-  sudo apt update
   sudo apt install -y curl
 fi
 
@@ -72,6 +75,9 @@ if [[ "$INSTALL_TERMINAL" == "s" ]]; then
   curl -fsSL "$REPO_RAW_BASE/terminal/linux.sh" -o "$TMP_DIR/terminal/linux.sh"
   chmod +x "$TMP_DIR/terminal/linux.sh"
   bash "$TMP_DIR/terminal/linux.sh"
+
+  # Garante que binários instalados em ~/.local/bin sejam detectados na mesma sessão
+  export PATH="$HOME/.local/bin:$PATH"
 fi
 
 echo "🧠 Configurando VS Code..."
@@ -89,7 +95,14 @@ check_cmd code || echo "ℹ️  Se o VS Code acabou de ser instalado, pode ser n
 if [[ "$INSTALL_TERMINAL" == "s" ]]; then
   check_cmd zsh || true
   check_cmd neofetch || true
-  check_cmd oh-my-posh || echo "ℹ️  O oh-my-posh pode exigir reinício do shell/PATH após instalar."
+  if check_cmd oh-my-posh; then
+    true
+  elif [[ -x "$HOME/.local/bin/oh-my-posh" ]]; then
+    echo "✅ oh-my-posh ($HOME/.local/bin/oh-my-posh)"
+  else
+    echo "⚠️  oh-my-posh não encontrado"
+    echo "ℹ️  O oh-my-posh pode exigir reinício do shell/PATH após instalar."
+  fi
 fi
 
 echo "========================================"

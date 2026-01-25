@@ -5,6 +5,7 @@ set -e
 echo "🚀 Iniciando setup do terminal (Linux)"
 
 sudo apt update
+sudo apt upgrade -y
 
 sudo apt install -y \
   zsh \
@@ -28,6 +29,7 @@ else
 fi
 
 mkdir -p "$HOME/.local/bin"
+export PATH="$HOME/.local/bin:$PATH"
 
 if ! command -v oh-my-posh &> /dev/null; then
   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin"
@@ -69,6 +71,8 @@ alias code="code"
 command -v neofetch &> /dev/null && neofetch || true
 EOF
 
-chsh -s "$(command -v zsh)" || true
+if [[ "${SHELL:-}" != "$(command -v zsh)" ]]; then
+  echo "ℹ️  Para usar zsh como shell padrão, rode: chsh -s \"$(command -v zsh)\""
+fi
 
 echo "✅ Setup Linux concluído. Reinicie o terminal."
