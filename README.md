@@ -189,6 +189,56 @@ Cada sistema usa seu próprio script:
 
 ---
 
+## ✅ Depois que finalizar (Terminal)
+
+Algumas configurações (fonte, shell padrão, `PATH`, perfil do PowerShell) só aparecem **ao abrir uma nova sessão**.
+
+### 🪟 Windows (Windows Terminal / PowerShell)
+
+1. Feche e reabra o **Windows Terminal**.
+2. Abra uma aba de **PowerShell** (de preferência `pwsh`).
+3. Se o tema/prompt não aparecer:
+   - Confirme que o perfil foi escrito em `Documents\PowerShell\Microsoft.PowerShell_profile.ps1`.
+   - Rode `pwsh` novamente (nova aba) para recarregar o profile.
+4. Se o `oh-my-posh`/`neofetch` não for encontrado, reinicie o Windows Terminal (às vezes o PATH demora a atualizar após o `winget`).
+
+### 🐧 Linux (Ubuntu/Debian)
+
+1. Feche e reabra o terminal.
+2. Se você ainda cair no **bash**, rode:
+
+```bash
+exec zsh
+```
+
+3. Para abrir o assistente do tema (Powerlevel10k):
+
+```bash
+p10k configure
+```
+
+4. Se o script não conseguiu setar o zsh como shell padrão, rode manualmente (pode pedir senha):
+
+```bash
+sudo chsh -s "$(command -v zsh)" "$USER"
+```
+
+5. Para ver o terminal “do jeito certo”, abra o **Terminator** e valide se a fonte/ícones aparecem.
+
+### 🍎 macOS
+
+1. Feche e reabra o terminal.
+2. Se você usa zsh (padrão no macOS), o `.zshrc` já será carregado automaticamente.
+3. Se o prompt/aliases não aparecerem, rode:
+
+```bash
+source ~/.zshrc
+```
+
+4. As Nerd Fonts são instaladas via Homebrew Cask; às vezes o Terminal/iTerm precisa ser reaberto para listar a fonte.
+
+---
+
 ## 🔁 Posso rodar mais de uma vez?
 
 ✅ Sim.
