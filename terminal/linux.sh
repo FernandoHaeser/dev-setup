@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -e
 
 echo "🚀 Iniciando setup do terminal (Linux)"
@@ -14,7 +13,7 @@ echo "🔧 Atualizando sistema..."
 sudo apt update
 sudo apt upgrade -y
 
-echo "📦 Instalando dependências base..."
+echo "📦 Instalando pacotes base..."
 sudo apt install -y \
   software-properties-common \
   curl \
@@ -22,15 +21,15 @@ sudo apt install -y \
   git \
   terminator \
   zsh \
+  neovim \
   fonts-firacode \
-  neovim
+  fonts-powerline
 
 # ---------- FASTFETCH ----------
 echo "🖼️ Instalando Fastfetch..."
 if apt-cache show fastfetch >/dev/null 2>&1; then
   sudo apt install -y fastfetch
 else
-  echo "➡️ Fastfetch não disponível no apt, instalando via GitHub..."
   FASTFETCH_URL=$(curl -fsSL https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest \
     | grep browser_download_url \
     | grep linux-amd64.deb \
@@ -48,8 +47,7 @@ fi
 # ---------- OH MY ZSH ----------
 echo "🎨 Instalando Oh My Zsh..."
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-  export RUNZSH=no
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
 fi
 
 ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
@@ -79,12 +77,26 @@ if [[ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ]]; then
     "$ZSH_CUSTOM/themes/powerlevel10k" || true
 fi
 
+# ---------- POWERLEVEL10K CONFIG ----------
+echo "⚙️ Criando configuração padrão do Powerlevel10k..."
+cat > "$HOME/.p10k.zsh" << 'EOF'
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time time)
+POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
+POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX=''
+POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX='❯ '
+POWERLEVEL9K_TIME_FORMAT='%H:%M'
+POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=2
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+EOF
+
 # ---------- ZSHRC ----------
 echo "📝 Criando .zshrc..."
 cat > "$HOME/.zshrc" << 'EOF'
 export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
 
 plugins=(
   git
@@ -95,7 +107,9 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-# Fastfetch no início
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+# Fastfetch ao iniciar
 if command -v fastfetch >/dev/null 2>&1; then
   fastfetch
 fi
@@ -116,11 +130,9 @@ echo "🖥️ Configurando Terminator..."
 mkdir -p "$HOME/.config/terminator"
 
 cat > "$HOME/.config/terminator/config" << 'EOF'
-[global_config]
-[keybindings]
 [profiles]
   [[default]]
-    font = Fira Code 11
+    font = FiraCode Nerd Font 11
     use_system_font = False
     background_color = "#1e1e2e"
     foreground_color = "#cdd6f4"
@@ -134,17 +146,16 @@ cat > "$HOME/.config/terminator/config" << 'EOF'
     [[[child1]]]
       type = Terminal
       parent = window0
-[plugins]
 EOF
 
 # ---------- SHELL PADRÃO ----------
 echo "🔁 Definindo Zsh como shell padrão..."
-if chsh -s "$(command -v zsh)" >/dev/null 2>&1; then
+if sudo chsh -s "$(command -v zsh)" "$USER" >/dev/null 2>&1; then
   echo "✅ Zsh definido como shell padrão"
 else
-  echo "ℹ️  Não foi possível definir automaticamente (pode exigir senha). Rode manualmente: chsh -s \"$(command -v zsh)\""
+  echo "ℹ️  Não foi possível definir automaticamente (pode exigir senha). Rode manualmente: sudo chsh -s \"$(command -v zsh)\" \"$USER\""
 fi
 
 echo ""
-echo "✅ Ambiente configurado com sucesso!"
-echo "👉 Feche o terminal, abra de novo e configure o Powerlevel10k."
+echo "✅ Ambiente DEV configurado com sucesso!"
+echo "➡️ Feche e abra o terminal para ver tudo funcionando."
