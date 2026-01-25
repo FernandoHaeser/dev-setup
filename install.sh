@@ -37,6 +37,12 @@ check_cmd() {
   return 1
 }
 
+if ! command -v curl &> /dev/null; then
+  echo "📦 Instalando curl..."
+  sudo apt update
+  sudo apt install -y curl
+fi
+
 if ! command -v node &> /dev/null; then
   echo "📦 Instalando Node.js..."
   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -

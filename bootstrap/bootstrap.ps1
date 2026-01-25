@@ -29,6 +29,15 @@ $tempRoot = Join-Path $env:TEMP ("dev-setup-" + [Guid]::NewGuid().ToString('n'))
 try {
   New-Item -ItemType Directory -Path $tempRoot | Out-Null
 
+  if ($env:SETUP_TERMINAL -eq "true") {
+    $terminalDir = Join-Path $tempRoot 'terminal'
+    New-Item -ItemType Directory -Path $terminalDir | Out-Null
+    $terminalScript = Join-Path $terminalDir 'windows.ps1'
+    Invoke-WebRequest -Uri "$repoRawBase/terminal/windows.ps1" -UseBasicParsing -OutFile $terminalScript
+    try { Unblock-File -Path $terminalScript -ErrorAction SilentlyContinue } catch {}
+    & $terminalScript
+  }
+
   $vscodeDir = Join-Path $tempRoot 'vscode'
   New-Item -ItemType Directory -Path $vscodeDir | Out-Null
   Invoke-WebRequest -Uri "$repoRawBase/vscode/setup.js" -UseBasicParsing -OutFile (Join-Path $vscodeDir 'setup.js')
@@ -41,12 +50,23 @@ try {
     Pop-Location
   }
 
+  Write-Host "----------------------------------------"
+  Write-Host "🔎 Verificando instalações"
+  foreach ($cmd in @('winget', 'node', 'git', 'code')) {
+    if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+      Write-Host "✅ $cmd"
+    } else {
+      Write-Host "⚠️  $cmd não encontrado (pode exigir reinício do terminal/Windows)"
+    }
+  }
   if ($env:SETUP_TERMINAL -eq "true") {
-    $terminalDir = Join-Path $tempRoot 'terminal'
-    New-Item -ItemType Directory -Path $terminalDir | Out-Null
-    $terminalScript = Join-Path $terminalDir 'windows.ps1'
-    Invoke-WebRequest -Uri "$repoRawBase/terminal/windows.ps1" -UseBasicParsing -OutFile $terminalScript
-    & $terminalScript
+    foreach ($cmd in @('wt', 'oh-my-posh', 'neofetch')) {
+      if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+        Write-Host "✅ $cmd"
+      } else {
+        Write-Host "⚠️  $cmd não encontrado (pode exigir reinício do terminal/Windows)"
+      }
+    }
   }
 } finally {
   if (Test-Path $tempRoot) {

@@ -7,6 +7,26 @@ const path = require('path')
 
 console.log('🧠 Configurando VS Code')
 
+function parseJsonLenient(text) {
+  try {
+    return JSON.parse(text)
+  } catch {}
+
+  const withoutBlockComments = text.replace(/\/\*[\s\S]*?\*\//g, '')
+  const withoutLineComments = withoutBlockComments.replace(/^\s*\/\/.*$/gm, '')
+  const withoutTrailingCommas = withoutLineComments.replace(/,\s*([}\]])/g, '$1')
+  return JSON.parse(withoutTrailingCommas)
+}
+
+function hasCodeCli() {
+  try {
+    execSync('code --version', { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+
 const extensions = [
   'eamodio.gitlens',
   'esbenp.prettier-vscode',
@@ -15,12 +35,18 @@ const extensions = [
   'be5invis.vscode-custom-css'
 ]
 
-extensions.forEach(ext => {
-  try {
-    execSync(`code --install-extension ${ext}`, { stdio: 'ignore' })
-    console.log(`✔ ${ext}`)
-  } catch {}
-})
+if (!hasCodeCli()) {
+  console.log("⚠️  Comando 'code' não encontrado; pulando instalação de extensões (reinicie o terminal/abra o VS Code uma vez e rode novamente).")
+} else {
+  extensions.forEach(ext => {
+    try {
+      execSync(`code --install-extension ${ext}`, { stdio: 'ignore' })
+      console.log(`✔ ${ext}`)
+    } catch {
+      console.log(`⚠️  Falhou ao instalar: ${ext}`)
+    }
+  })
+}
 
 let settingsPath
 if (os.platform() === 'win32') {
@@ -31,13 +57,17 @@ if (os.platform() === 'win32') {
 
 fs.mkdirSync(path.dirname(settingsPath), { recursive: true })
 
-const baseSettings = JSON.parse(
+const baseSettings = parseJsonLenient(
   fs.readFileSync(path.join(__dirname, 'settings.json'), 'utf8')
 )
 
 let current = {}
 if (fs.existsSync(settingsPath)) {
-  current = JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
+  try {
+    current = parseJsonLenient(fs.readFileSync(settingsPath, 'utf8'))
+  } catch {
+    current = {}
+  }
 }
 
 const finalSettings = { ...current, ...baseSettings }

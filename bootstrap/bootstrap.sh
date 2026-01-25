@@ -14,6 +14,19 @@ check_cmd() {
   return 1
 }
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  if ! command -v brew &> /dev/null; then
+    echo "📦 Instalando Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+else
+  if ! command -v curl &> /dev/null; then
+    echo "📦 Instalando curl..."
+    sudo apt update
+    sudo apt install -y curl
+  fi
+fi
+
 if ! command -v node &> /dev/null; then
   if [[ "$OSTYPE" == "darwin"* ]]; then
     brew install node
@@ -46,12 +59,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$TMP_DIR/vscode"
-curl -fsSL "$REPO_RAW_BASE/vscode/setup.js" -o "$TMP_DIR/vscode/setup.js"
-curl -fsSL "$REPO_RAW_BASE/vscode/settings.json" -o "$TMP_DIR/vscode/settings.json"
-cd "$TMP_DIR/vscode"
-node setup.js
-
 if [[ "$SETUP_TERMINAL" == "true" ]]; then
   mkdir -p "$TMP_DIR/terminal"
   if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -64,6 +71,12 @@ if [[ "$SETUP_TERMINAL" == "true" ]]; then
     bash "$TMP_DIR/terminal/linux.sh"
   fi
 fi
+
+mkdir -p "$TMP_DIR/vscode"
+curl -fsSL "$REPO_RAW_BASE/vscode/setup.js" -o "$TMP_DIR/vscode/setup.js"
+curl -fsSL "$REPO_RAW_BASE/vscode/settings.json" -o "$TMP_DIR/vscode/settings.json"
+cd "$TMP_DIR/vscode"
+node setup.js
 
 echo "----------------------------------------"
 echo "🔎 Verificando instalações"

@@ -10,19 +10,31 @@ sudo apt install -y \
   zsh \
   curl \
   git \
-  neofetch
+  neofetch \
+  fontconfig
 
-if ! command -v eza &> /dev/null; then
-  sudo apt install -y eza
+LIST_TOOL=""
+if command -v eza &> /dev/null; then
+  LIST_TOOL="eza"
+elif command -v exa &> /dev/null; then
+  LIST_TOOL="exa"
+else
+  sudo apt install -y eza >/dev/null 2>&1 || sudo apt install -y exa >/dev/null 2>&1 || true
+  if command -v eza &> /dev/null; then
+    LIST_TOOL="eza"
+  elif command -v exa &> /dev/null; then
+    LIST_TOOL="exa"
+  fi
 fi
 
 if ! command -v oh-my-posh &> /dev/null; then
   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
 fi
 
-if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc 2>/dev/null; then
-  echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
-fi
+THEME_DIR="$HOME/.config/oh-my-posh"
+mkdir -p "$THEME_DIR"
+curl -fsSL "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/jandedobbeleer.omp.json" \
+  -o "$THEME_DIR/jandedobbeleer.omp.json"
 
 FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
@@ -39,16 +51,22 @@ cat << 'EOF' > ~/.zshrc
 
 export PATH="$HOME/.local/bin:$PATH"
 
-eval "$(oh-my-posh init zsh --config ~/.cache/oh-my-posh/themes/jandedobbeleer.omp.json)"
+eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/jandedobbeleer.omp.json)"
 
-alias ll="eza -la --icons"
+if command -v eza &> /dev/null; then
+  alias ll="eza -la --icons"
+elif command -v exa &> /dev/null; then
+  alias ll="exa -la --icons"
+else
+  alias ll="ls -la"
+fi
 alias g="git"
 alias py="python3"
 alias code="code"
 
-neofetch
+command -v neofetch &> /dev/null && neofetch || true
 EOF
 
-chsh -s "$(which zsh)"
+chsh -s "$(command -v zsh)" || true
 
 echo "✅ Setup Linux concluído. Reinicie o terminal."

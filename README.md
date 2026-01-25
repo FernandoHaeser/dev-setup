@@ -22,11 +22,17 @@ Com **um único comando**, este projeto instala e configura:
 2. O script:
    - detecta o sistema operacional
    - instala dependências (Node, Git, VS Code)
-   - pergunta se você quer configurar o terminal
+   - pergunta se você quer configurar o terminal (mesmo rodando via `curl | bash`)
+   - se você escolher terminal, ele roda **primeiro**
    - baixa **apenas os arquivos necessários** (temporariamente)
    - aplica todas as configurações do VS Code
    - apaga os arquivos temporários ao finalizar
 3. Pronto. Ambiente configurado.
+
+> Importante: o script **não exige** que você clone/baixe o repositório. Ele só faz download temporário de:
+>
+>- `vscode/setup.js` e `vscode/settings.json`
+>- `terminal/<seu-sistema>.*` (somente se você habilitar o terminal)
 
 ---
 
@@ -60,6 +66,20 @@ Abra o **PowerShell como administrador** e execute:
 iwr https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/install.ps1 -useb | iex
 ```
 
+### ✅ Forçar terminal ligado/desligado (sem prompt)
+
+- Terminal ligado:
+
+```powershell
+$env:SETUP_TERMINAL = "true"; iwr https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/bootstrap/bootstrap.ps1 -useb | iex
+```
+
+- Terminal desligado:
+
+```powershell
+$env:SETUP_TERMINAL = "false"; iwr https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/bootstrap/bootstrap.ps1 -useb | iex
+```
+
 ### 💬 Durante o processo
 
 Você verá a pergunta:
@@ -81,6 +101,20 @@ Deseja instalar/configurar o TERMINAL? (s/n)
 curl -fsSL https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/install.sh | bash
 ```
 
+### ✅ Forçar terminal ligado/desligado (sem prompt)
+
+- Terminal ligado:
+
+```bash
+DEV_SETUP_TERMINAL=s curl -fsSL https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/install.sh | bash
+```
+
+- Terminal desligado:
+
+```bash
+DEV_SETUP_TERMINAL=n curl -fsSL https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/install.sh | bash
+```
+
 ### 💬 Durante o processo
 
 ```
@@ -98,6 +132,20 @@ Deseja instalar/configurar o TERMINAL? (s/n):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/install-macos.sh | bash
+```
+
+### ✅ Forçar terminal ligado/desligado (sem prompt)
+
+- Terminal ligado:
+
+```bash
+DEV_SETUP_TERMINAL=s curl -fsSL https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/install-macos.sh | bash
+```
+
+- Terminal desligado:
+
+```bash
+DEV_SETUP_TERMINAL=n curl -fsSL https://raw.githubusercontent.com/fernandohaeser/dev-setup/main/install-macos.sh | bash
 ```
 
 > O Homebrew será instalado automaticamente se não existir.

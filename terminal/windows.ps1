@@ -1,5 +1,7 @@
 # TERMINAL DEV SETUP - WINDOWS
 
+$ErrorActionPreference = 'Stop'
+
 Write-Host "Iniciando setup do terminal..." -ForegroundColor Cyan
 
 if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
@@ -7,16 +9,16 @@ if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
     exit
 }
 
-winget install --id Microsoft.WindowsTerminal -e --silent
+winget install --id Microsoft.WindowsTerminal -e --silent --accept-source-agreements --accept-package-agreements
 
-winget install --id Microsoft.PowerShell -e --silent
+winget install --id Microsoft.PowerShell -e --silent --accept-source-agreements --accept-package-agreements
 
-winget install JanDeDobbeleer.OhMyPosh -s winget --silent
+winget install --id JanDeDobbeleer.OhMyPosh -e --silent --accept-source-agreements --accept-package-agreements
 
-winget install --id Neofetch.Neofetch -e --silent
+winget install --id Neofetch.Neofetch -e --silent --accept-source-agreements --accept-package-agreements
 
-Install-Module PSReadLine -Force -SkipPublisherCheck
-Install-Module Terminal-Icons -Force -SkipPublisherCheck
+Install-Module PSReadLine -Force -SkipPublisherCheck -Scope CurrentUser
+Install-Module Terminal-Icons -Force -SkipPublisherCheck -Scope CurrentUser
 
 $profilePath = $PROFILE
 $profileDir = Split-Path $profilePath
@@ -31,24 +33,34 @@ if (!(Test-Path $profileDir)) {
 # ================================
 
 # Prompt bonito
-oh-my-posh init pwsh --config "\$env:POSH_THEMES_PATH\\jandedobbeleer.omp.json" | Invoke-Expression
+if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
+    if (Test-Path "\$env:POSH_THEMES_PATH\\jandedobbeleer.omp.json") {
+        oh-my-posh init pwsh --config "\$env:POSH_THEMES_PATH\\jandedobbeleer.omp.json" | Invoke-Expression
+    } else {
+        oh-my-posh init pwsh | Invoke-Expression
+    }
+}
 
 # Ícones em pastas
-Import-Module Terminal-Icons
+Import-Module Terminal-Icons -ErrorAction SilentlyContinue
 
 # Autocomplete melhor
-Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -PredictionViewStyle ListView
-Set-PSReadLineKeyHandler -Key Tab -Function Complete
+if (Get-Module -ListAvailable -Name PSReadLine) {
+    Set-PSReadLineOption -PredictionSource History
+    Set-PSReadLineOption -PredictionViewStyle ListView
+    Set-PSReadLineKeyHandler -Key Tab -Function Complete
+}
 
 # Neofetch ao abrir
-neofetch
+if (Get-Command neofetch -ErrorAction SilentlyContinue) { neofetch }
 
 # Aliases úteis
 Set-Alias ll ls
 Set-Alias g git
 Set-Alias py python
-Set-Alias code "C:\\Program Files\\Microsoft VS Code\\Code.exe"
+if (Test-Path "C:\\Program Files\\Microsoft VS Code\\Code.exe") {
+    Set-Alias code "C:\\Program Files\\Microsoft VS Code\\Code.exe"
+}
 
 # Git branch no prompt
 \$env:POSH_GIT_ENABLED = \$true
