@@ -30,7 +30,51 @@ function Download-File {
     [Parameter(Mandatory = $true)][string]$Uri,
     [Parameter(Mandatory = $true)][string]$OutFile
   )
+  if ([string]::IsNullOrWhiteSpace($Uri)) {
+    throw "Download-File: Uri vazio."
+  }
+  if ([string]::IsNullOrWhiteSpace($OutFile)) {
+    throw "Download-File: OutFile vazio."
+  }
+  if ($Uri -notmatch '^https?://') {
+    throw "Download-File: Uri inválido: $Uri"
+  }
+  $parent = Split-Path -Parent $OutFile
+  if ($parent -and -not (Test-Path $parent)) {
+    New-Item -ItemType Directory -Path $parent -Force | Out-Null
+  }
   Invoke-WebRequest -Uri $Uri -UseBasicParsing -OutFile $OutFile
+}
+
+function Refresh-SessionPath {
+  # Winget/MSI/EXE frequentemente atualizam o PATH no registro, mas a sessão atual não vê.
+  try {
+    $machine = [Environment]::GetEnvironmentVariable('Path', 'Machine')
+    $user = [Environment]::GetEnvironmentVariable('Path', 'User')
+    if ($machine -or $user) {
+      $env:Path = @($machine, $user, $env:Path) -join ';'
+    }
+  } catch {}
+}
+
+function Add-ToPathIfExists {
+  param([Parameter(Mandatory = $true)][string]$Dir)
+  if (-not (Test-Path $Dir)) { return }
+  $parts = $env:Path -split ';' | Where-Object { $_ -and $_.Trim() -ne '' }
+  if ($parts -contains $Dir) { return }
+  $env:Path = "$Dir;$env:Path"
+}
+
+function Ensure-ToolOnPath {
+  param(
+    [Parameter(Mandatory = $true)][string]$Exe,
+    [Parameter(Mandatory = $true)][string[]]$CandidateDirs
+  )
+  Refresh-SessionPath
+  foreach ($d in $CandidateDirs) {
+    Add-ToPathIfExists -Dir $d
+  }
+  return (Test-Command $Exe)
 }
 
 function Install-Msi {
@@ -89,6 +133,13 @@ function Ensure-Node {
     }
 
     if (Test-Command 'node') { return }
+
+    # Node via winget/MSI pode estar instalado mas ainda não entrou no PATH desta sessão.
+    $nodeDirs = @(
+      (Join-Path $env:ProgramFiles 'nodejs'),
+      (Join-Path $env:LOCALAPPDATA 'Programs\nodejs')
+    )
+    if (Ensure-ToolOnPath -Exe 'node' -CandidateDirs $nodeDirs) { return }
   }
 
   Write-Host "📦 Instalando Node.js (MSI)..."
@@ -121,6 +172,12 @@ function Ensure-Git {
     }
 
     if (Test-Command 'git') { return }
+
+    $gitDirs = @(
+      (Join-Path $env:ProgramFiles 'Git\cmd'),
+      (Join-Path ${env:ProgramFiles(x86)} 'Git\cmd')
+    )
+    if (Ensure-ToolOnPath -Exe 'git' -CandidateDirs $gitDirs) { return }
   }
 
   Write-Host "📦 Instalando Git (EXE)..."
@@ -148,6 +205,12 @@ function Ensure-VSCode {
     }
 
     if (Test-Command 'code') { return }
+
+    $codeDirs = @(
+      (Join-Path $env:LOCALAPPDATA 'Programs\Microsoft VS Code\bin'),
+      (Join-Path $env:ProgramFiles 'Microsoft VS Code\bin')
+    )
+    if (Ensure-ToolOnPath -Exe 'code' -CandidateDirs $codeDirs) { return }
   }
 
   Write-Host "📦 Instalando VS Code (EXE)..."

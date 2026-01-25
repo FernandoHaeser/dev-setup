@@ -1,6 +1,11 @@
-# 🚀 Dev Setup Universal
+# Dev Setup Universal
 
-# Teste
+[![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/fernandohaeser/dev-setup)
+[![last commit](https://img.shields.io/github/last-commit/fernandohaeser/dev-setup)](https://github.com/fernandohaeser/dev-setup/commits/main)
+[![repo size](https://img.shields.io/github/repo-size/fernandohaeser/dev-setup)](https://github.com/fernandohaeser/dev-setup)
+[![issues](https://img.shields.io/github/issues/fernandohaeser/dev-setup)](https://github.com/fernandohaeser/dev-setup/issues)
+[![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-5391FE?logo=powershell&logoColor=white)](https://learn.microsoft.com/powershell/)
+[![Shell](https://img.shields.io/badge/Shell-bash-4EAA25?logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
 
 Setup automático de ambiente de desenvolvimento para **Windows, Linux e macOS**.
 
@@ -13,6 +18,11 @@ Com **um único comando**, este projeto instala e configura:
 - ✅ Terminal personalizado (**opcional**)
 
 👉 O usuário **não precisa baixar nada manualmente**, apenas rodar o comando do seu sistema.
+
+- [Windows](#windows)
+- [Linux](#linux-ubuntu--debian)
+- [macOS](#macos)
+- [Depois que finalizar (Terminal)](#depois-que-finalizar-terminal)
 
 ---
 
