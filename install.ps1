@@ -4,6 +4,11 @@ Write-Host "========================================"
 
 $ErrorActionPreference = 'Stop'
 
+# Permite execução de scripts nesta sessão (não altera a máquina permanentemente)
+try {
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+} catch {}
+
 # Garante TLS moderno para downloads HTTPS em ambientes antigos
 try {
   [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
@@ -77,8 +82,13 @@ function Ensure-Node {
 
   if ($UseWinget) {
     Write-Host "📦 Instalando Node.js (winget)..."
-    winget install OpenJS.NodeJS.LTS -e --silent --accept-source-agreements --accept-package-agreements
-    return
+    try {
+      winget install OpenJS.NodeJS.LTS -e --silent --source winget --accept-source-agreements --accept-package-agreements
+    } catch {
+      Write-Warning "Falha ao instalar via winget, usando fallback (MSI): $($_.Exception.Message)"
+    }
+
+    if (Test-Command 'node') { return }
   }
 
   Write-Host "📦 Instalando Node.js (MSI)..."
@@ -104,8 +114,13 @@ function Ensure-Git {
 
   if ($UseWinget) {
     Write-Host "📦 Instalando Git (winget)..."
-    winget install Git.Git -e --silent --accept-source-agreements --accept-package-agreements
-    return
+    try {
+      winget install Git.Git -e --silent --source winget --accept-source-agreements --accept-package-agreements
+    } catch {
+      Write-Warning "Falha ao instalar via winget, usando fallback (EXE): $($_.Exception.Message)"
+    }
+
+    if (Test-Command 'git') { return }
   }
 
   Write-Host "📦 Instalando Git (EXE)..."
@@ -126,8 +141,13 @@ function Ensure-VSCode {
 
   if ($UseWinget) {
     Write-Host "📦 Instalando VS Code (winget)..."
-    winget install Microsoft.VisualStudioCode -e --silent --accept-source-agreements --accept-package-agreements
-    return
+    try {
+      winget install Microsoft.VisualStudioCode -e --silent --source winget --accept-source-agreements --accept-package-agreements
+    } catch {
+      Write-Warning "Falha ao instalar via winget, usando fallback (EXE): $($_.Exception.Message)"
+    }
+
+    if (Test-Command 'code') { return }
   }
 
   Write-Host "📦 Instalando VS Code (EXE)..."
@@ -169,7 +189,11 @@ try {
     $terminalScript = Join-Path $terminalDir 'windows.ps1'
     Invoke-WebRequest -Uri "$repoRawBase/terminal/windows.ps1" -UseBasicParsing -OutFile $terminalScript
     try { Unblock-File -Path $terminalScript -ErrorAction SilentlyContinue } catch {}
-    & $terminalScript
+    if (Test-Command 'pwsh') {
+      & pwsh -NoProfile -ExecutionPolicy Bypass -File $terminalScript
+    } else {
+      & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $terminalScript
+    }
   }
 
   Write-Host "🧠 Configurando VS Code..."

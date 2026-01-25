@@ -3,6 +3,10 @@ Write-Host "🚀 Dev Setup - Windows"
 $ErrorActionPreference = 'Stop'
 
 try {
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+} catch {}
+
+try {
   [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 } catch {}
 
@@ -73,8 +77,13 @@ function Ensure-Node {
   if (Test-Command 'node') { return }
 
   if ($UseWinget) {
-    winget install OpenJS.NodeJS.LTS -e --silent --accept-source-agreements --accept-package-agreements
-    return
+    try {
+      winget install OpenJS.NodeJS.LTS -e --silent --source winget --accept-source-agreements --accept-package-agreements
+    } catch {
+      Write-Warning "Falha ao instalar Node via winget, usando fallback (MSI): $($_.Exception.Message)"
+    }
+
+    if (Test-Command 'node') { return }
   }
 
   $tmp = New-TempDir
@@ -98,8 +107,13 @@ function Ensure-Git {
   if (Test-Command 'git') { return }
 
   if ($UseWinget) {
-    winget install Git.Git -e --silent --accept-source-agreements --accept-package-agreements
-    return
+    try {
+      winget install Git.Git -e --silent --source winget --accept-source-agreements --accept-package-agreements
+    } catch {
+      Write-Warning "Falha ao instalar Git via winget, usando fallback (EXE): $($_.Exception.Message)"
+    }
+
+    if (Test-Command 'git') { return }
   }
 
   $tmp = New-TempDir
@@ -118,8 +132,13 @@ function Ensure-VSCode {
   if (Test-Command 'code') { return }
 
   if ($UseWinget) {
-    winget install Microsoft.VisualStudioCode -e --silent --accept-source-agreements --accept-package-agreements
-    return
+    try {
+      winget install Microsoft.VisualStudioCode -e --silent --source winget --accept-source-agreements --accept-package-agreements
+    } catch {
+      Write-Warning "Falha ao instalar VS Code via winget, usando fallback (EXE): $($_.Exception.Message)"
+    }
+
+    if (Test-Command 'code') { return }
   }
 
   $tmp = New-TempDir
@@ -155,7 +174,11 @@ try {
     $terminalScript = Join-Path $terminalDir 'windows.ps1'
     Invoke-WebRequest -Uri "$repoRawBase/terminal/windows.ps1" -UseBasicParsing -OutFile $terminalScript
     try { Unblock-File -Path $terminalScript -ErrorAction SilentlyContinue } catch {}
-    & $terminalScript
+    if (Test-Command 'pwsh') {
+      & pwsh -NoProfile -ExecutionPolicy Bypass -File $terminalScript
+    } else {
+      & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $terminalScript
+    }
   }
 
   $vscodeDir = Join-Path $tempRoot 'vscode'

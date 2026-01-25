@@ -2,6 +2,10 @@
 
 $ErrorActionPreference = 'Stop'
 
+try {
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+} catch {}
+
 Write-Host "Iniciando setup do terminal..." -ForegroundColor Cyan
 
 if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
@@ -24,10 +28,18 @@ if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
 }
 
 if (Get-Command winget -ErrorAction SilentlyContinue) {
-    winget install --id Microsoft.WindowsTerminal -e --silent --accept-source-agreements --accept-package-agreements
-    winget install --id Microsoft.PowerShell -e --silent --accept-source-agreements --accept-package-agreements
-    winget install --id JanDeDobbeleer.OhMyPosh -e --silent --accept-source-agreements --accept-package-agreements
-    winget install --id Neofetch.Neofetch -e --silent --accept-source-agreements --accept-package-agreements
+    foreach ($pkg in @(
+        @{ id = 'Microsoft.WindowsTerminal'; name = 'Windows Terminal' },
+        @{ id = 'Microsoft.PowerShell'; name = 'PowerShell' },
+        @{ id = 'JanDeDobbeleer.OhMyPosh'; name = 'Oh My Posh' },
+        @{ id = 'Neofetch.Neofetch'; name = 'Neofetch' }
+    )) {
+        try {
+            winget install --id $pkg.id -e --silent --source winget --accept-source-agreements --accept-package-agreements
+        } catch {
+            Write-Warning "Falha ao instalar $($pkg.name) via winget: $($_.Exception.Message)"
+        }
+    }
 } else {
     Write-Warning "Winget ainda não está disponível. Vou configurar o profile do PowerShell, mas não consigo instalar Windows Terminal/Oh My Posh/Neofetch automaticamente sem winget."
 }
