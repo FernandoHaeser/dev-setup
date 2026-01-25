@@ -4,6 +4,16 @@ set -e
 
 echo "🚀 Dev Setup - Unix"
 
+check_cmd() {
+  local cmd="$1"
+  if command -v "$cmd" &> /dev/null; then
+    echo "✅ $cmd"
+    return 0
+  fi
+  echo "⚠️  $cmd não encontrado"
+  return 1
+}
+
 if ! command -v node &> /dev/null; then
   if [[ "$OSTYPE" == "darwin"* ]]; then
     brew install node
@@ -53,6 +63,16 @@ if [[ "$SETUP_TERMINAL" == "true" ]]; then
     chmod +x "$TMP_DIR/terminal/linux.sh"
     bash "$TMP_DIR/terminal/linux.sh"
   fi
+fi
+
+echo "----------------------------------------"
+echo "🔎 Verificando instalações"
+check_cmd node || true
+check_cmd git || true
+check_cmd code || echo "ℹ️  Pode ser necessário reiniciar o terminal para o comando 'code' aparecer." 
+if [[ "$SETUP_TERMINAL" == "true" ]]; then
+  check_cmd neofetch || true
+  check_cmd oh-my-posh || true
 fi
 
 echo "✅ Setup concluído"

@@ -45,6 +45,7 @@ try {
 
     $terminalScript = Join-Path $terminalDir 'windows.ps1'
     Invoke-WebRequest -Uri "$repoRawBase/terminal/windows.ps1" -UseBasicParsing -OutFile $terminalScript
+    try { Unblock-File -Path $terminalScript -ErrorAction SilentlyContinue } catch {}
     & $terminalScript
   }
 
@@ -60,6 +61,25 @@ try {
     node .\setup.js
   } finally {
     Pop-Location
+  }
+
+  Write-Host "----------------------------------------"
+  Write-Host "🔎 Verificando instalações"
+  foreach ($cmd in @('winget', 'node', 'git', 'code')) {
+    if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+      Write-Host "✅ $cmd"
+    } else {
+      Write-Host "⚠️  $cmd não encontrado (pode exigir reinício do terminal/Windows)"
+    }
+  }
+  if ($installTerminal) {
+    foreach ($cmd in @('wt', 'oh-my-posh', 'neofetch')) {
+      if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+        Write-Host "✅ $cmd"
+      } else {
+        Write-Host "⚠️  $cmd não encontrado (pode exigir reinício do terminal/Windows)"
+      }
+    }
   }
 } finally {
   if (Test-Path $tempRoot) {
