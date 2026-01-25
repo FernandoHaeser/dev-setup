@@ -97,7 +97,7 @@ if [[ "$INSTALL_TERMINAL" == "s" ]]; then
   check_cmd terminator || true
   check_cmd nvim || true
   check_cmd fastfetch || true
-  echo "ℹ️  O Terminator foi configurado para usar a fonte 'FiraCode Nerd Font 11'. Se ela não aparecer, instale uma Nerd Font compatível ou ajuste ~/.config/terminator/config."
+  echo "ℹ️  O Terminator foi configurado para usar 'FiraCode Nerd Font 11'. Reinicie o terminal para carregar a fonte e o zsh."
 fi
 
 echo "========================================"

@@ -23,7 +23,15 @@ sudo apt install -y \
   zsh \
   neovim \
   fonts-firacode \
-  fonts-powerline
+  fonts-powerline \
+  fontconfig
+
+echo "🔤 Instalando FiraCode Nerd Font (para ícones)..."
+FONT_DIR="$HOME/.local/share/fonts"
+mkdir -p "$FONT_DIR"
+curl -fLo "$FONT_DIR/FiraCodeNerdFont-Regular.ttf" \
+  https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/FiraCodeNerdFont-Regular.ttf
+fc-cache -fv || true
 
 # ---------- FASTFETCH ----------
 echo "🖼️ Instalando Fastfetch..."
@@ -150,7 +158,9 @@ EOF
 
 # ---------- SHELL PADRÃO ----------
 echo "🔁 Definindo Zsh como shell padrão..."
-if sudo chsh -s "$(command -v zsh)" "$USER" >/dev/null 2>&1; then
+if chsh -s "$(command -v zsh)" "$USER" >/dev/null 2>&1; then
+  echo "✅ Zsh definido como shell padrão"
+elif sudo chsh -s "$(command -v zsh)" "$USER" >/dev/null 2>&1; then
   echo "✅ Zsh definido como shell padrão"
 else
   echo "ℹ️  Não foi possível definir automaticamente (pode exigir senha). Rode manualmente: sudo chsh -s \"$(command -v zsh)\" \"$USER\""
@@ -158,4 +168,5 @@ fi
 
 echo ""
 echo "✅ Ambiente DEV configurado com sucesso!"
-echo "➡️ Feche e abra o terminal para ver tudo funcionando."
+echo "➡️ Se você ainda estiver no bash, rode agora: exec zsh"
+echo "➡️ Para abrir o wizard do tema: p10k configure"
