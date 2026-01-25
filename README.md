@@ -178,7 +178,6 @@ Esse arquivo é a **fonte da verdade**.
 Se ativado, o script instala e configura:
 
 - Prompt estilizado
-- Ícones Nerd Font
 - Tema moderno
 - Integração com Git
 

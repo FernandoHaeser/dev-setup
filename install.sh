@@ -94,15 +94,9 @@ check_cmd git || true
 check_cmd code || echo "ℹ️  Se o VS Code acabou de ser instalado, pode ser necessário reiniciar o terminal para o comando 'code' aparecer." 
 if [[ "$INSTALL_TERMINAL" == "s" ]]; then
   check_cmd zsh || true
-  check_cmd neofetch || true
-  if check_cmd oh-my-posh; then
-    true
-  elif [[ -x "$HOME/.local/bin/oh-my-posh" ]]; then
-    echo "✅ oh-my-posh ($HOME/.local/bin/oh-my-posh)"
-  else
-    echo "⚠️  oh-my-posh não encontrado"
-    echo "ℹ️  O oh-my-posh pode exigir reinício do shell/PATH após instalar."
-  fi
+  check_cmd terminator || true
+  check_cmd nvim || true
+  check_cmd fastfetch || true
 fi
 
 echo "========================================"
