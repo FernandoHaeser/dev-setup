@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 const { execSync } = require('child_process')
 const fs = require('fs')
 const os = require('os')
@@ -11,11 +10,11 @@ function parseJsonLenient(text) {
   try {
     return JSON.parse(text)
   } catch {}
-
-  const withoutBlockComments = text.replace(/\/\*[\s\S]*?\*\//g, '')
-  const withoutLineComments = withoutBlockComments.replace(/^\s*\/\/.*$/gm, '')
-  const withoutTrailingCommas = withoutLineComments.replace(/,\s*([}\]])/g, '$1')
-  return JSON.parse(withoutTrailingCommas)
+  const clean = text
+    .replace(/\/\*[\s\S]*?\*\//g, '')   // block comments
+    .replace(/^\s*\/\/.*$/gm, '')        // line comments
+    .replace(/,\s*([}\]])/g, '$1')       // trailing commas
+  return JSON.parse(clean)
 }
 
 function hasCodeCli() {
@@ -27,39 +26,65 @@ function hasCodeCli() {
   }
 }
 
-const extensions = [
-  'eamodio.gitlens',
-  'esbenp.prettier-vscode',
-  'miguelsolorio.symbols',
-  'brandonkirbyson.vscode-animations',
-  'be5invis.vscode-custom-css'
-]
+function getAnimationsExtPath() {
+  const extDir = path.join(os.homedir(), '.vscode', 'extensions')
 
-if (!hasCodeCli()) {
-  console.log("⚠️  Comando 'code' não encontrado; pulando instalação de extensões (reinicie o terminal/abra o VS Code uma vez e rode novamente).")
-} else {
-  extensions.forEach(ext => {
-    try {
-      execSync(`code --install-extension ${ext}`, { stdio: 'ignore' })
-      console.log(`✔ ${ext}`)
-    } catch {
-      console.log(`⚠️  Falhou ao instalar: ${ext}`)
-    }
-  })
+  let folder = null
+  if (fs.existsSync(extDir)) {
+    folder = fs.readdirSync(extDir).find(d =>
+      d.startsWith('brandonkirbyson.vscode-animations')
+    )
+  }
+
+  const relPath = folder
+    ? path.join(extDir, folder, 'dist', 'updateHandler.js')
+    : path.join(extDir, 'brandonkirbyson.vscode-animations-2.0.7', 'dist', 'updateHandler.js')
+
+  if (os.platform() === 'win32') {
+    return 'file:///' + relPath.replace(/\\/g, '/')
+  }
+  return 'file://' + relPath
 }
 
-let settingsPath
-if (os.platform() === 'win32') {
-  settingsPath = path.join(process.env.APPDATA, 'Code', 'User', 'settings.json')
-} else {
-  settingsPath = path.join(os.homedir(), '.config', 'Code', 'User', 'settings.json')
-}
+function getSettingsPath() {
+  const platform = os.platform()
 
-fs.mkdirSync(path.dirname(settingsPath), { recursive: true })
+  if (platform === 'win32') {
+    return path.join(process.env.APPDATA, 'Code', 'User', 'settings.json')
+  }
+
+  if (platform === 'darwin') {
+    return path.join(os.homedir(), 'Library', 'Application Support', 'Code', 'User', 'settings.json')
+  }
+
+  // linux / ubuntu
+  return path.join(os.homedir(), '.config', 'Code', 'User', 'settings.json')
+}
 
 const baseSettings = parseJsonLenient(
   fs.readFileSync(path.join(__dirname, 'settings.json'), 'utf8')
 )
+
+const extensions = baseSettings['__extensions'] ?? []
+delete baseSettings['__extensions']
+
+if (!hasCodeCli()) {
+  console.log("⚠️  Comando 'code' não encontrado; pulando extensões.")
+} else {
+  extensions.forEach(ext => {
+    try {
+      execSync(`code --install-extension ${ext} --force`, { stdio: 'ignore' })
+      console.log(`✔ ${ext}`)
+    } catch {
+      console.log(`⚠️  Falhou: ${ext}`)
+    }
+  })
+}
+
+baseSettings['vscode_custom_css.imports'] = [getAnimationsExtPath()]
+
+const settingsPath = getSettingsPath()
+fs.mkdirSync(path.dirname(settingsPath), { recursive: true })
 
 let current = {}
 if (fs.existsSync(settingsPath)) {
@@ -71,6 +96,6 @@ if (fs.existsSync(settingsPath)) {
 }
 
 const finalSettings = { ...current, ...baseSettings }
-
 fs.writeFileSync(settingsPath, JSON.stringify(finalSettings, null, 2))
-console.log('✅ VS Code pronto')
+
+console.log(`✅ VS Code pronto (${os.platform()} — ${settingsPath})`)
