@@ -1,31 +1,105 @@
 // FernandoHaeser configs
-
 {
-  "workbench.colorTheme": "GitHub Dark",
-  "workbench.iconTheme": "symbols",
-  "workbench.startupEditor": "none",
+    "__extensions": [
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "miguelsolorio.symbols",
+        "brandonkirbyson.vscode-animations",
+        "be5invis.vscode-custom-css",
+        "charliermarsh.ruff",
+        "bmewburn.vscode-intelephense-client"
+    ],
 
-  "workbench.activityBar.location": "top",
-  "workbench.sideBar.location": "right",
+    // === AI & Copilot ===
+    "gitlens.ai.model": "vscode",
+    "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false,
+        "c": false
+    },
 
-  "editor.cursorSmoothCaretAnimation": "on",
-  "animations.CursorAnimation": true,
+    // === Workbench ===
+    "workbench.colorTheme": "GitHub Dark",
+    "workbench.iconTheme": "symbols",
+    "workbench.startupEditor": "none",
+    "workbench.activityBar.location": "top",
+    "workbench.sideBar.location": "right",
+    "workbench.editor.empty.hint": "hidden",
 
-  "files.autoSave": "afterDelay",
-  "explorer.confirmDragAndDrop": false,
-  "explorer.confirmDelete": false,
+    // === Editor ===
+    "editor.fontFamily": "'JetBrains Mono', monospace",
+    "editor.fontLigatures": true,
+    "editor.cursorSmoothCaretAnimation": "on",
+    "animations.CursorAnimation": true,
 
-  "gitlens.ai.model": "vscode",
-  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
-  "github.copilot.nextEditSuggestions.enabled": true,
+    // === Files & Explorer ===
+    "files.autoSave": "afterDelay",
+    "explorer.confirmDragAndDrop": false,
+    "explorer.confirmDelete": false,
 
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+    // === Git ===
+    "git.autofetch": true,
+
+    // === Terminal ===
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+
+    // === Debug ===
+    "debug.onTaskErrors": "debugAnyway",
+
+    // === Claude Code ===
+    "claudeCode.preferredLocation": "panel",
+
+    // === Formatters por linguagem ===
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[php]": {
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+    },
+
+    // === Python (Ruff) ===
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
+    "ruff.lint.enable": true,
+    "ruff.format.enable": true,
+
+    // === Custom CSS & Background (injetado pelo setup.js) ===
+    "background.enabled": true
 }
