@@ -240,9 +240,6 @@ function Ensure-VSCode {
 
  $usingWinget = Ensure-Winget
 
-$installTerminal = Read-Host "Deseja instalar/configurar o TERMINAL? (s/n)"
-$installTerminal = $installTerminal.ToLower() -eq "s"
-
 Ensure-Node -UseWinget:$usingWinget
 Ensure-Git -UseWinget:$usingWinget
 Ensure-VSCode -UseWinget:$usingWinget
@@ -252,21 +249,6 @@ $tempRoot = Join-Path $env:TEMP ("dev-setup-" + [Guid]::NewGuid().ToString('n'))
 
 try {
   New-Item -ItemType Directory -Path $tempRoot | Out-Null
-
-  if ($installTerminal) {
-    Write-Step "Configurando terminal..."
-    $terminalDir = Join-Path $tempRoot 'terminal'
-    New-Item -ItemType Directory -Path $terminalDir | Out-Null
-
-    $terminalScript = Join-Path $terminalDir 'windows.ps1'
-    Invoke-WebRequest -Uri "$repoRawBase/terminal/windows.ps1" -UseBasicParsing -OutFile $terminalScript
-    try { Unblock-File -Path $terminalScript -ErrorAction SilentlyContinue } catch {}
-    if (Test-Command 'pwsh') {
-      & pwsh -NoProfile -ExecutionPolicy Bypass -File $terminalScript
-    } else {
-      & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $terminalScript
-    }
-  }
 
   Write-Step "Configurando VS Code (extensões + settings)..."
   $vscodeDir = Join-Path $tempRoot 'vscode'
@@ -289,15 +271,6 @@ try {
       Write-Ok "$cmd"
     } else {
       Write-WarnMsg "$cmd não encontrado (pode exigir reinício do terminal/Windows)"
-    }
-  }
-  if ($installTerminal) {
-    foreach ($cmd in @('wt', 'oh-my-posh', 'neofetch')) {
-      if (Get-Command $cmd -ErrorAction SilentlyContinue) {
-        Write-Ok "$cmd"
-      } else {
-        Write-WarnMsg "$cmd não encontrado (pode exigir reinício do terminal/Windows)"
-      }
     }
   }
 } finally {
