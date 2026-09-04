@@ -26,24 +26,36 @@ function hasCodeCli() {
   }
 }
 
-function getAnimationsExtPath() {
+function resolveExtFile(extPrefix, fallbackFolder, ...fileParts) {
   const extDir = path.join(os.homedir(), '.vscode', 'extensions')
 
   let folder = null
   if (fs.existsSync(extDir)) {
-    folder = fs.readdirSync(extDir).find(d =>
-      d.startsWith('brandonkirbyson.vscode-animations')
-    )
+    folder = fs.readdirSync(extDir).find(d => d.startsWith(extPrefix))
   }
 
-  const relPath = folder
-    ? path.join(extDir, folder, 'dist', 'updateHandler.js')
-    : path.join(extDir, 'brandonkirbyson.vscode-animations-2.0.7', 'dist', 'updateHandler.js')
+  const relPath = path.join(extDir, folder ?? fallbackFolder, ...fileParts)
 
   if (os.platform() === 'win32') {
     return 'file:///' + relPath.replace(/\\/g, '/')
   }
   return 'file://' + relPath
+}
+
+function getAnimationsExtPath() {
+  return resolveExtFile(
+    'brandonkirbyson.vscode-animations',
+    'brandonkirbyson.vscode-animations-2.0.7',
+    'dist', 'updateHandler.js'
+  )
+}
+
+function getSmearcursorExtPath() {
+  return resolveExtFile(
+    'yesitsfebreeze.smearcursor',
+    'yesitsfebreeze.smearcursor-1.3.0',
+    '_smearcursor.js'
+  )
 }
 
 function getSettingsPath() {
@@ -81,7 +93,7 @@ if (!hasCodeCli()) {
   })
 }
 
-baseSettings['vscode_custom_css.imports'] = [getAnimationsExtPath()]
+baseSettings['vscode_custom_css.imports'] = [getAnimationsExtPath(), getSmearcursorExtPath()]
 
 const settingsPath = getSettingsPath()
 fs.mkdirSync(path.dirname(settingsPath), { recursive: true })
