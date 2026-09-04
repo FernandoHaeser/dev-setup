@@ -95,20 +95,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [[ "$SETUP_TERMINAL" == "true" ]]; then
-  step "Configurando terminal..."
-  mkdir -p "$TMP_DIR/terminal"
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    curl -fsSL "$REPO_RAW_BASE/terminal/macos.sh" -o "$TMP_DIR/terminal/macos.sh"
-    chmod +x "$TMP_DIR/terminal/macos.sh"
-    bash "$TMP_DIR/terminal/macos.sh"
-  else
-    curl -fsSL "$REPO_RAW_BASE/terminal/linux.sh" -o "$TMP_DIR/terminal/linux.sh"
-    chmod +x "$TMP_DIR/terminal/linux.sh"
-    bash "$TMP_DIR/terminal/linux.sh"
-  fi
-fi
-
 step "Configurando VS Code (extensões + settings)..."
 mkdir -p "$TMP_DIR/vscode"
 curl -fsSL "$REPO_RAW_BASE/vscode/setup.js" -o "$TMP_DIR/vscode/setup.js"
@@ -121,10 +107,6 @@ step "Verificando instalações"
 check_cmd node || true
 check_cmd git || true
 check_cmd code || info "Pode ser necessário reiniciar o terminal para o comando 'code' aparecer."
-if [[ "$SETUP_TERMINAL" == "true" ]]; then
-  check_cmd neofetch || true
-  check_cmd oh-my-posh || true
-fi
 
 hr
 ok "Setup concluído"

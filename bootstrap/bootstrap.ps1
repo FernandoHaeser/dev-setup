@@ -240,19 +240,6 @@ $tempRoot = Join-Path $env:TEMP ("dev-setup-" + [Guid]::NewGuid().ToString('n'))
 try {
   New-Item -ItemType Directory -Path $tempRoot | Out-Null
 
-  if ($env:SETUP_TERMINAL -eq "true") {
-    $terminalDir = Join-Path $tempRoot 'terminal'
-    New-Item -ItemType Directory -Path $terminalDir | Out-Null
-    $terminalScript = Join-Path $terminalDir 'windows.ps1'
-    Invoke-WebRequest -Uri "$repoRawBase/terminal/windows.ps1" -UseBasicParsing -OutFile $terminalScript
-    try { Unblock-File -Path $terminalScript -ErrorAction SilentlyContinue } catch {}
-    if (Test-Command 'pwsh') {
-      & pwsh -NoProfile -ExecutionPolicy Bypass -File $terminalScript
-    } else {
-      & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $terminalScript
-    }
-  }
-
   $vscodeDir = Join-Path $tempRoot 'vscode'
   New-Item -ItemType Directory -Path $vscodeDir | Out-Null
   Invoke-WebRequest -Uri "$repoRawBase/vscode/setup.js" -UseBasicParsing -OutFile (Join-Path $vscodeDir 'setup.js')
@@ -272,15 +259,6 @@ try {
       Write-Ok "$cmd"
     } else {
       Write-WarnMsg "$cmd não encontrado (pode exigir reinício do terminal/Windows)"
-    }
-  }
-  if ($env:SETUP_TERMINAL -eq "true") {
-    foreach ($cmd in @('wt', 'oh-my-posh', 'neofetch')) {
-      if (Get-Command $cmd -ErrorAction SilentlyContinue) {
-        Write-Ok "$cmd"
-      } else {
-        Write-WarnMsg "$cmd não encontrado (pode exigir reinício do terminal/Windows)"
-      }
     }
   }
 } finally {
